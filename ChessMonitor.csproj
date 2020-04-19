@@ -36,6 +36,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChessVision.cs" />
+    <Compile Include="MouseOperations.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

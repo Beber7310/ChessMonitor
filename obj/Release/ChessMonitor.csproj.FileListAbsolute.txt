@@ -1,0 +1,13 @@
+C:\Users\bdosd\Source\Repos\ChessMonitor\bin\Release\ChessMonitor.exe.config
+C:\Users\bdosd\Source\Repos\ChessMonitor\bin\Release\ChessMonitor.exe
+C:\Users\bdosd\Source\Repos\ChessMonitor\bin\Release\ChessMonitor.pdb
+C:\Users\bdosd\Source\Repos\ChessMonitor\bin\Release\AForge.dll
+C:\Users\bdosd\Source\Repos\ChessMonitor\bin\Release\AForge.Imaging.dll
+C:\Users\bdosd\Source\Repos\ChessMonitor\bin\Release\AForge.Math.dll
+C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Release\ChessMonitor.csprojAssemblyReference.cache
+C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Release\ChessMonitor.Form1.resources
+C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Release\ChessMonitor.csproj.GenerateResource.cache
+C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Release\ChessMonitor.csproj.CoreCompileInputs.cache
+C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Release\ChessMonitor.csproj.CopyComplete
+C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Release\ChessMonitor.exe
+C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Release\ChessMonitor.pdb

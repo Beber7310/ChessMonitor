@@ -1,4 +1,4 @@
-﻿namespace ScreenCaptureDemo
+﻿namespace ChessMonitor
 {
     partial class Form1
     {
