@@ -44,6 +44,7 @@ namespace ChessMonitor
       
         public bool ChessboardRead(Bitmap captureBitmap)
         {
+            bool res=false;
             List<int> coordX = new List<int>();
             List<int> coordY = new List<int>();
              
@@ -66,11 +67,15 @@ namespace ChessMonitor
                 Console.WriteLine("AnalysePiece execution time:" + watch.ElapsedMilliseconds);
 
                 chessboardCoord = new Rectangle(coordX[0], coordY[0], coordX[8] - coordX[0], coordY[8] - coordY[0]);
+                res = true;
             }
             else
             {
+                res = false;
                 Console.WriteLine("Unable to find the chessboard");
             }
+
+            return res;
         }
 
         public void ChessboardCalibrate(Bitmap captureBitmap)
@@ -353,6 +358,8 @@ namespace ChessMonitor
         private void AnalysePiece(Bitmap image, List<int> coordX, List<int> coordY)
         {
             char[] board = new char[64];
+
+
 
             if ((coordX.Count == 9) && (coordY.Count == 9))
             {

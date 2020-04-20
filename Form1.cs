@@ -42,11 +42,16 @@ namespace ChessMonitor
             Bitmap captureBitmap=CaptureMyScreen();
             captureBitmap.Save("capture.png");
             found=vision.ChessboardRead(captureBitmap);
-            
-            if(!found)
 
-            if(found)
-                vision.MovePiece(1, 0,2,2);
+            if (found)
+            {
+                checkBoxChessboardFound.Checked = true;
+                vision.MovePiece(1, 0, 2, 2);
+                
+            }else
+            {
+                checkBoxChessboardFound.Checked = false;
+            }
         }
 
         private void buttonCalibrate_Click(object sender, EventArgs e)
