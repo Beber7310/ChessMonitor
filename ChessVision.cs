@@ -15,7 +15,7 @@ namespace ChessMonitor
 {
     class ChessVision
     {
-   
+
         public ChessVision()
         {
             loadCalibratePiece();
@@ -39,21 +39,25 @@ namespace ChessMonitor
         private Bitmap ImageBlackBishop;
         private Bitmap ImageBlackQueen;
         private Bitmap ImageBlackKing;
-        
+
         private Rectangle chessboardCoord;
-      
-        public bool ChessboardRead(Bitmap captureBitmap)
+
+        
+
+        public bool ChessboardRead(Bitmap captureBitmap, ref char[] board)
         {
-            bool res=false;
+            bool res = false;
             List<int> coordX = new List<int>();
             List<int> coordY = new List<int>();
-             
+
+
+
             var watch = System.Diagnostics.Stopwatch.StartNew();
             {
                 FindChessBoard(captureBitmap, ref coordX, ref coordY);
             }
             watch.Stop();
-            Console.WriteLine("FindChessBoard  execution time:"+watch.ElapsedMilliseconds);
+            Console.WriteLine("FindChessBoard  execution time:" + watch.ElapsedMilliseconds);
 
 
             if ((coordX.Count == 9) && (coordY.Count == 9))
@@ -61,7 +65,7 @@ namespace ChessMonitor
                 watch = System.Diagnostics.Stopwatch.StartNew();
                 {
                     removeBackground(ref captureBitmap);
-                    AnalysePiece(captureBitmap, coordX, coordY);
+                    AnalysePiece(captureBitmap, coordX, coordY, ref board);
                 }
                 watch.Stop();
                 Console.WriteLine("AnalysePiece execution time:" + watch.ElapsedMilliseconds);
@@ -78,7 +82,7 @@ namespace ChessMonitor
             return res;
         }
 
-        public void ChessboardCalibrate(Bitmap captureBitmap)
+        public bool ChessboardCalibrate(Bitmap captureBitmap)
         {
             List<int> coordX = new List<int>();
             List<int> coordY = new List<int>();
@@ -88,34 +92,56 @@ namespace ChessMonitor
             {
                 removeBackground(ref captureBitmap);
                 CalibratePiece(captureBitmap, coordX, coordY);
+                return true;
             }
+            return false;
         }
 
-        public void MovePiece(int start_x, int start_y, int end_x, int end_y)
+        public void MovePiece(string szMove)
         {
+            int start_x, start_y, end_x, end_y;
+
+                 
+            int sx, sy, ex, ey;
+
+            start_x = szMove[0] - 'a';
+            start_y = szMove[1] - '1';
+            end_x = szMove[2] - 'a';
+            end_y = szMove[3] - '1';
+
+
             int s_screenX, s_screenY;
             int e_screenX, e_screenY;
 
-            if (chessboardCoord!=null)
+            if (chessboardCoord != null)
             {
-                s_screenX = chessboardCoord.Left + (chessboardCoord.Width/16) + (chessboardCoord.Width * start_x) / 8;
+                s_screenX = chessboardCoord.Left + (chessboardCoord.Width / 16) + (chessboardCoord.Width * start_x) / 8;
                 s_screenY = chessboardCoord.Bottom - (chessboardCoord.Height / 16) - (chessboardCoord.Height * start_y) / 8;
 
                 e_screenX = chessboardCoord.Left + (chessboardCoord.Width / 16) + (chessboardCoord.Width * end_x) / 8;
                 e_screenY = chessboardCoord.Bottom - (chessboardCoord.Height / 16) - (chessboardCoord.Height * end_y) / 8;
 
+                System.Windows.Forms.Screen[] scrn = System.Windows.Forms.Screen.AllScreens;
+
+                s_screenX += scrn[0].Bounds.X;
+                s_screenY += scrn[0].Bounds.Y;
+
+                e_screenX += scrn[0].Bounds.X;
+                e_screenY += scrn[0].Bounds.Y;
+
 
                 MouseOperations.SetCursorPosition(s_screenX, s_screenY);
-                System.Threading.Thread.Sleep(100);
+                System.Threading.Thread.Sleep(200);
                 MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
-                System.Threading.Thread.Sleep(100);
-                MouseOperations.SetCursorPosition((e_screenX+s_screenX)/2, (e_screenY+e_screenY)/2);
-                System.Threading.Thread.Sleep(100);
+                System.Threading.Thread.Sleep(200);
+                MouseOperations.SetCursorPosition((e_screenX + s_screenX) / 2, (e_screenY + e_screenY) / 2);
+                System.Threading.Thread.Sleep(200);
                 MouseOperations.SetCursorPosition(e_screenX, e_screenY);
-                System.Threading.Thread.Sleep(100);
+                System.Threading.Thread.Sleep(200);
                 MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
             }
-            else { 
+            else
+            {
                 //error
             }
         }
@@ -355,10 +381,8 @@ namespace ChessMonitor
 
         }
 
-        private void AnalysePiece(Bitmap image, List<int> coordX, List<int> coordY)
+        private bool AnalysePiece(Bitmap image, List<int> coordX, List<int> coordY, ref char[] board)
         {
-            char[] board = new char[64];
-
 
 
             if ((coordX.Count == 9) && (coordY.Count == 9))
@@ -418,13 +442,17 @@ namespace ChessMonitor
                         }
                         else if (isWhiteKing(ref ImageCrop))
                         {
-                            board[8 * yy + xx] = 'K';                            
+                            board[8 * yy + xx] = 'K';
                         }
                         else if (isBlackKing(ref ImageCrop))
                         {
                             board[8 * yy + xx] = 'k';
                         }
                     }
+            }
+            else
+            {
+                return false;
             }
 
 
@@ -436,6 +464,7 @@ namespace ChessMonitor
                 }
                 Console.WriteLine(" ");
             }
+            return true;
         }
 
 
