@@ -42,7 +42,7 @@ namespace ChessMonitor
 
         private Rectangle chessboardCoord;
 
-        
+
 
         public bool ChessboardRead(Bitmap captureBitmap, ref char[] board)
         {
@@ -57,7 +57,7 @@ namespace ChessMonitor
                 FindChessBoard(captureBitmap, ref coordX, ref coordY);
             }
             watch.Stop();
-            Console.WriteLine("FindChessBoard  execution time:" + watch.ElapsedMilliseconds);
+            // Console.WriteLine("FindChessBoard  execution time:" + watch.ElapsedMilliseconds);
 
 
             if ((coordX.Count == 9) && (coordY.Count == 9))
@@ -68,7 +68,7 @@ namespace ChessMonitor
                     AnalysePiece(captureBitmap, coordX, coordY, ref board);
                 }
                 watch.Stop();
-                Console.WriteLine("AnalysePiece execution time:" + watch.ElapsedMilliseconds);
+                // Console.WriteLine("AnalysePiece execution time:" + watch.ElapsedMilliseconds);
 
                 chessboardCoord = new Rectangle(coordX[0], coordY[0], coordX[8] - coordX[0], coordY[8] - coordY[0]);
                 res = true;
@@ -101,7 +101,7 @@ namespace ChessMonitor
         {
             int start_x, start_y, end_x, end_y;
 
-                 
+
             int sx, sy, ex, ey;
 
             start_x = szMove[0] - 'a';
@@ -186,65 +186,67 @@ namespace ChessMonitor
         {
             Crop filterCrop;
 
+            int offset = (coordX[1] - coordX[0])/8;
+
             //ImageEmptyBlack
-            filterCrop = new Crop(new Rectangle(coordX[0] + 1, coordY[5] + 1, (coordX[1] - coordX[0]) - 2, (coordY[6] - coordY[5]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[5] + 1, (coordX[1] - coordX[0]) - 2 * offset, (coordY[6] - coordY[5]) - 2));
             ImageEmptyBlack = filterCrop.Apply(image);
             ImageEmptyBlack.Save("result_EmptyBlack.png");
 
             //ImageEmptyWhite
-            filterCrop = new Crop(new Rectangle(coordX[1] + 1, coordY[5] + 1, (coordX[2] - coordX[1]) - 2, (coordY[6] - coordY[5]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[5] + 1, (coordX[2] - coordX[1]) - 2 * offset, (coordY[6] - coordY[5]) - 2));
             ImageEmptyWhite = filterCrop.Apply(image);
             ImageEmptyWhite.Save("result_EmptyWhite.png");
 
             //Pawn
-            filterCrop = new Crop(new Rectangle(coordX[0] + 1, coordY[6] + 1, (coordX[1] - coordX[0]) - 2, (coordY[7] - coordY[6]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[6] + 1, (coordX[1] - coordX[0]) - 2 * offset, (coordY[7] - coordY[6]) - 2));
             ImageWhitePawn = filterCrop.Apply(image);
             ImageWhitePawn.Save("result_white_pawn.png");
-            filterCrop = new Crop(new Rectangle(coordX[0] + 1, coordY[1], (coordX[1] - coordX[0]) - 2, (coordY[2] - coordY[1]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[1], (coordX[1] - coordX[0]) - 2 * offset, (coordY[2] - coordY[1]) - 2));
             ImageBlackPawn = filterCrop.Apply(image);
             ImageBlackPawn.Save("result_black_pawn.png");
 
             //rook
-            filterCrop = new Crop(new Rectangle(coordX[0] + 1, coordY[7] + 1, (coordX[1] - coordX[0]) - 2, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[7] + 1, (coordX[1] - coordX[0]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
             ImageWhiteRook = filterCrop.Apply(image);
             ImageWhiteRook.Save("result_white_rook.png");
-            filterCrop = new Crop(new Rectangle(coordX[0] + 1, coordY[0], (coordX[1] - coordX[0]) - 2, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[0], (coordX[1] - coordX[0]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
             ImageBlackRook = filterCrop.Apply(image);
             ImageBlackRook.Save("result_black_rook.png");
 
             //Knight
-            filterCrop = new Crop(new Rectangle(coordX[1] + 1, coordY[7] + 1, (coordX[2] - coordX[1]) - 2, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[7] + 1, (coordX[2] - coordX[1]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
             ImageWhiteKnight = filterCrop.Apply(image);
             ImageWhiteKnight.Save("result_white_knight.png");
-            filterCrop = new Crop(new Rectangle(coordX[1] + 1, coordY[0] + 1, (coordX[2] - coordX[1]) - 2, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[0] + 1, (coordX[2] - coordX[1]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
             ImageBlackKnight = filterCrop.Apply(image);
             ImageBlackKnight.Save("result_black_knight.png");
 
 
             //bishop
-            filterCrop = new Crop(new Rectangle(coordX[2] + 1, coordY[7] + 1, (coordX[3] - coordX[2]) - 2, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[2] + offset, coordY[7] + 1, (coordX[3] - coordX[2]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
             ImageWhiteBishop = filterCrop.Apply(image);
             ImageWhiteBishop.Save("result_white_bishop.png");
-            filterCrop = new Crop(new Rectangle(coordX[2] + 1, coordY[0] + 1, (coordX[3] - coordX[2]) - 2, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[2] + offset, coordY[0] + 1, (coordX[3] - coordX[2]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
             ImageBlackBishop = filterCrop.Apply(image);
             ImageBlackBishop.Save("result_black_bishop.png");
 
             //queen
-            filterCrop = new Crop(new Rectangle(coordX[3] + 1, coordY[7] + 1, (coordX[4] - coordX[3]) - 2, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[3] + offset, coordY[7] + 1, (coordX[4] - coordX[3]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
             ImageWhiteQueen = filterCrop.Apply(image);
             ImageWhiteQueen.Save("result_white_queen.png");
 
-            filterCrop = new Crop(new Rectangle(coordX[3] + 1, coordY[0] + 1, (coordX[4] - coordX[3]) - 2, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[3] + offset, coordY[0] + 1, (coordX[4] - coordX[3]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
             ImageBlackQueen = filterCrop.Apply(image);
             ImageBlackQueen.Save("result_black_queen.png");
 
 
             //King
-            filterCrop = new Crop(new Rectangle(coordX[4] + 1, coordY[7] + 1, (coordX[5] - coordX[4]) - 2, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[4] + offset, coordY[7] + 1, (coordX[5] - coordX[4]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
             ImageWhiteKing = filterCrop.Apply(image);
             ImageWhiteKing.Save("result_white_king.png");
 
-            filterCrop = new Crop(new Rectangle(coordX[4] + 1, coordY[0] + 1, (coordX[5] - coordX[4]) - 2, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[4] + offset, coordY[0] + 1, (coordX[5] - coordX[4]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
             ImageBlackKing = filterCrop.Apply(image);
             ImageBlackKing.Save("result_black_king.png");
 
@@ -372,7 +374,7 @@ namespace ChessMonitor
             filter.Hue = new IntRange(91, 42);
             filter.Saturation = new DoubleRange(0, 1);
             filter.Luminance = new DoubleRange(0, 1);
-            // apply the filter
+            filter.FillColor = new HSL(0, 0, 0.5);            // apply the filter
             filter.ApplyInPlace(image);
 
             Grayscale filterG = new Grayscale(0.2125, 0.7154, 0.0721);
@@ -455,7 +457,7 @@ namespace ChessMonitor
                 return false;
             }
 
-
+            /*
             for (int ii = 0; ii < 8; ii++)
             {
                 for (int jj = 0; jj < 8; jj++)
@@ -464,6 +466,7 @@ namespace ChessMonitor
                 }
                 Console.WriteLine(" ");
             }
+            */
             return true;
         }
 
@@ -474,7 +477,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteKing);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -485,7 +488,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackKing);
-            if (matchings[0].Similarity > 0.95f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -496,7 +499,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteQueen);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -507,7 +510,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackQueen);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -518,7 +521,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhitePawn);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -529,7 +532,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageEmptyWhite);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -542,7 +545,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackPawn);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -554,7 +557,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteRook);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -565,7 +568,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackRook);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -576,7 +579,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteBishop);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -587,7 +590,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackBishop);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -598,7 +601,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteKnight);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }
@@ -609,7 +612,7 @@ namespace ChessMonitor
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackKnight);
-            if (matchings[0].Similarity > 0.97f)
+            if (matchings[0].Similarity > 0.96f)
             {
                 return true;
             }

@@ -35,8 +35,13 @@ namespace ChessMonitor
         private Button button4;
         private TextBox tbMove;
         private Timer Timer_100ms;
+        private Timer Timer_500ms;
 
-        private char[] referenceBoard;
+        private bool GameOngoing;
+        private bool GameWaitOpponent;
+
+
+        string timerDetectedMove;
 
         public Form1()
         {
@@ -44,13 +49,20 @@ namespace ChessMonitor
             Timer_100ms = new Timer();
             Timer_100ms.Interval = 100;
             Timer_100ms.Enabled = true;
-
             Timer_100ms.Tick += new System.EventHandler(timer1_Tick);
+
+            Timer_500ms = new Timer();
+            Timer_500ms.Interval = 500;
+            Timer_500ms.Enabled = true;
+            Timer_500ms.Tick += new System.EventHandler(timer500_Tick);
 
             vision = new ChessVision();
             uci = new uciInterface();
 
             uci.init();
+
+            GameOngoing = false;
+            GameWaitOpponent = false;
         }
 
         private void buttonCapture_Click(object sender, EventArgs e)
@@ -67,7 +79,7 @@ namespace ChessMonitor
 
                 checkBoxChessboardFound.Checked = true;
                 uci.newboard();
-                 
+
             }
             else
             {
@@ -84,10 +96,10 @@ namespace ChessMonitor
             {
                 uci.newboard();
             }
-             
+
         }
 
-         
+
 
         private Bitmap CaptureMyScreen()
         {
@@ -123,7 +135,7 @@ namespace ChessMonitor
             return null;
         }
 
-         
+
         private void InitializeComponent()
         {
             this.button1 = new System.Windows.Forms.Button();
@@ -163,7 +175,7 @@ namespace ChessMonitor
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.button4);
             this.groupBox1.Controls.Add(this.button3);
@@ -211,7 +223,7 @@ namespace ChessMonitor
             // 
             // textBoxMoussePos
             // 
-            this.textBoxMoussePos.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBoxMoussePos.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxMoussePos.Location = new System.Drawing.Point(14, 16);
             this.textBoxMoussePos.Name = "textBoxMoussePos";
@@ -238,7 +250,7 @@ namespace ChessMonitor
             this.button4.TabIndex = 3;
             this.button4.Text = "Compute move";
             this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button4.Click += new System.EventHandler(this.GamePlay);
             // 
             // tbMove
             // 
@@ -278,7 +290,11 @@ namespace ChessMonitor
         {
             MouseOperations.MousePoint pos = MouseOperations.GetCursorPosition();
             textBoxMoussePos.Text = "X:" + System.Windows.Forms.Control.MousePosition.X + " Y:" + System.Windows.Forms.Control.MousePosition.Y;
+
         }
+
+
+
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -299,11 +315,85 @@ namespace ChessMonitor
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void GamePlay(object sender, EventArgs e)
         {
-            string move=uci.Compute();
+            GameOngoing = true;
+            GameWaitOpponent = false;
+
+
+            bool found = false;
+            Bitmap captureBitmap = CaptureMyScreen();
+            captureBitmap.Save("capture.png");
+            char[] boardRead = new char[64];
+            char[] boardAfter = new char[64];
+
+            found = vision.ChessboardRead(captureBitmap, ref boardRead);
+
+            if (found)
+            {
+                checkBoxChessboardFound.Checked = true;
+                uci.newboard();
+            }
+            else
+            {
+                checkBoxChessboardFound.Checked = false;
+            }
+
+            string move = uci.Compute();
             tbMove.Text = uci.szUciMove;
             vision.MovePiece(move);
+            GameWaitOpponent = true;
+
         }
+
+
+        private void timer500_Tick(object sender, EventArgs e)
+        {
+             string move2play;
+            string lclDetectedMove;
+
+            Bitmap captureBitmap;
+            char[] boardRead = new char[64];
+
+
+            if (GameWaitOpponent)
+            {
+                captureBitmap = CaptureMyScreen();
+
+                if (!vision.ChessboardRead(captureBitmap, ref boardRead))
+                {
+                    Console.WriteLine("Board not found in timer 500");
+                }
+                else
+                {
+                    lclDetectedMove = uci.ComputeMoveFromBoard(uci.boardRef, boardRead);
+                    if ((lclDetectedMove == timerDetectedMove) && (timerDetectedMove.Length>0))
+                    {
+                        Console.WriteLine("Found move!!!!! " + timerDetectedMove);
+
+                        uci.ComputeBoardFromMove(ref uci.boardRef, timerDetectedMove);
+                        uci.updateUCImove(timerDetectedMove);
+
+                        move2play = uci.Compute();
+                        tbMove.Text = uci.szUciMove;
+                        vision.MovePiece(move2play);
+                        GameWaitOpponent = true;
+                        timerDetectedMove = "";
+                    }
+                    else
+                    {
+                        timerDetectedMove = lclDetectedMove;
+                    }
+                }
+            }
+            
+        }
+
+
+
+
+
+
+
     }
 }
