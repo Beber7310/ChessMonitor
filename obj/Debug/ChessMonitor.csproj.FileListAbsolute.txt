@@ -11,3 +11,16 @@ C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Debug\ChessMonitor.csproj.CoreCompi
 C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Debug\ChessMonitor.csproj.CopyComplete
 C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Debug\ChessMonitor.exe
 C:\Users\bdosd\Source\Repos\ChessMonitor\obj\Debug\ChessMonitor.pdb
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\bin\Debug\ChessMonitor.exe.config
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\bin\Debug\ChessMonitor.exe
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\bin\Debug\ChessMonitor.pdb
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\bin\Debug\AForge.dll
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\bin\Debug\AForge.Imaging.dll
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\bin\Debug\AForge.Math.dll
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\obj\Debug\ChessMonitor.csprojAssemblyReference.cache
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\obj\Debug\ChessMonitor.Form1.resources
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\obj\Debug\ChessMonitor.csproj.GenerateResource.cache
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\obj\Debug\ChessMonitor.csproj.CoreCompileInputs.cache
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\obj\Debug\ChessMonitor.csproj.CopyComplete
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\obj\Debug\ChessMonitor.exe
+C:\Users\bdosd\Google Drive\projects\ChessMonitor\obj\Debug\ChessMonitor.pdb

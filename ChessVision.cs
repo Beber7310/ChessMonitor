@@ -15,7 +15,7 @@ namespace ChessMonitor
 {
     class ChessVision
     {
-
+        readonly float compThresold = 0.95f;
         public ChessVision()
         {
             loadCalibratePiece();
@@ -186,7 +186,7 @@ namespace ChessMonitor
         {
             Crop filterCrop;
 
-            int offset = (coordX[1] - coordX[0])/8;
+            int offset = (coordX[1] - coordX[0]) / 8;
 
             //ImageEmptyBlack
             filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[5] + 1, (coordX[1] - coordX[0]) - 2 * offset, (coordY[6] - coordY[5]) - 2));
@@ -398,6 +398,94 @@ namespace ChessMonitor
                         Bitmap ImageCrop = filterCrop.Apply(image);
                         ImageCrop.Save("result_" + (xx + 1) + "_" + (8 - yy) + ".png");
 
+                        float lvl = 0.0f;
+                        float ret = 0.0f;
+
+                        isEmpty(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = ' ';
+                        }
+
+                        board[8 * yy + xx] = ' ';
+
+                        isWhitePawn(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'P';
+                        }
+
+                        isBlackPawn(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'p';
+                        }
+                        isWhiteRook(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'R';
+                        }
+                        isBlackRook(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'r';
+                        }
+                        isWhiteKnight(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'N';
+                        }
+                        isBlackKnight(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'n';
+                        }
+                        isWhiteBeshop(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'B';
+                        }
+                        isBlackBeshop(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'b';
+                        }
+                        isWhiteQueen(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'Q';
+                        }
+                        isBlackQueen(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'q';
+                        }
+                        isWhiteKing(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'K';
+                        }
+                        isBlackKing(ref ImageCrop, ref ret);
+                        if (ret > lvl)
+                        {
+                            lvl = ret;
+                            board[8 * yy + xx] = 'k';
+                        }
+
+
+                        /*
                         if (isEmpty(ref ImageCrop))
                         {
                             board[8 * yy + xx] = ' ';
@@ -450,6 +538,7 @@ namespace ChessMonitor
                         {
                             board[8 * yy + xx] = 'k';
                         }
+                        */
                     }
             }
             else
@@ -473,66 +562,97 @@ namespace ChessMonitor
 
         #region detection piece
 
-        private bool isWhiteKing(ref Bitmap ImageCrop)
+        private bool isWhiteKing(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteKing);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isBlackKing(ref Bitmap ImageCrop)
+        private bool isBlackKing(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackKing);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+            /*if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isWhiteQueen(ref Bitmap ImageCrop)
+        private bool isWhiteQueen(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteQueen);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isBlackQueen(ref Bitmap ImageCrop)
+        private bool isBlackQueen(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackQueen);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isWhitePawn(ref Bitmap ImageCrop)
+        private bool isWhitePawn(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhitePawn);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isEmpty(ref Bitmap ImageCrop)
+        private bool isEmpty(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageEmptyWhite);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+            /*if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
@@ -541,11 +661,16 @@ namespace ChessMonitor
 
 
 
-        private bool isBlackPawn(ref Bitmap ImageCrop)
+        private bool isBlackPawn(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackPawn);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+     /*       if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
@@ -553,66 +678,96 @@ namespace ChessMonitor
         }
 
 
-        private bool isWhiteRook(ref Bitmap ImageCrop)
+        private bool isWhiteRook(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteRook);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+            /*if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isBlackRook(ref Bitmap ImageCrop)
+        private bool isBlackRook(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackRook);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isWhiteBeshop(ref Bitmap ImageCrop)
+        private bool isWhiteBeshop(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteBishop);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isBlackBeshop(ref Bitmap ImageCrop)
+        private bool isBlackBeshop(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackBishop);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+            /*if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isWhiteKnight(ref Bitmap ImageCrop)
+        private bool isWhiteKnight(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteKnight);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+            /*if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }
             return false;
         }
 
-        private bool isBlackKnight(ref Bitmap ImageCrop)
+        private bool isBlackKnight(ref Bitmap ImageCrop, ref float lvl)
         {
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackKnight);
-            if (matchings[0].Similarity > 0.96f)
+            lvl = matchings[0].Similarity;
+            /*if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+            {
+                Console.WriteLine("image comp not clear");
+            }*/
+            if (matchings[0].Similarity > compThresold)
             {
                 return true;
             }

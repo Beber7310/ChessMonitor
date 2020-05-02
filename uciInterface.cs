@@ -36,8 +36,8 @@ namespace ChessMonitor
             {
                 Connect("127.0.0.1", "position startpos");
             }
-            
-            string res=Connect("127.0.0.1", "go");
+
+            string res = Connect("127.0.0.1", "go");
             string[] spl = res.Split(' ');
 
             if (spl[0] == "bestmove")
@@ -47,7 +47,7 @@ namespace ChessMonitor
                 Console.WriteLine(res);
                 return spl[1];
             }
-            return "";            
+            return "";
         }
 
         public void updateUCImove(string move)
@@ -55,6 +55,16 @@ namespace ChessMonitor
             szUciMove += move + " ";
         }
 
+        public bool compareBoard(char[] boardRef1, char[] boardRef2)
+        {
+            if (boardRef1.Length != boardRef2.Length)
+                return false;
+            for (int ii = 0; ii < boardRef1.Length; ii++)
+                if (boardRef1[ii] != boardRef2[ii])
+                    return false;
+
+            return true;
+        }
         public string ComputeMoveFromBoard(char[] boardRef, char[] boardCurrent)
         {
             List<int> diff = new List<int>();
@@ -70,27 +80,67 @@ namespace ChessMonitor
                 }
             }
 
-            if (diff.Count != 2)
+
+
+
+            if ((diff.Count < 2) || (diff.Count > 4))
                 return "";
 
-            if (boardRef[diff[0]] != ' ')
+
+            if (diff.Count == 2)
             {
-                start = diff[0];
-                end = diff[1];
-            }
-            else
-            {
-                start = diff[1];
-                end = diff[0];
+                if (boardCurrent[diff[0]] == ' ')
+                {
+                    start = diff[0];
+                    end = diff[1];
+                }
+                else
+                {
+                    start = diff[1];
+                    end = diff[0];
+                }
+
+                str = "";
+                str += Encoding.ASCII.GetString(new[] { (byte)((start % 8) + 'a') });
+                str += Encoding.ASCII.GetString(new[] { (byte)('8' - (start / 8)) });
+                str += Encoding.ASCII.GetString(new[] { (byte)((end % 8) + 'a') });
+                str += Encoding.ASCII.GetString(new[] { (byte)('8' - (end / 8)) });
+
+                return str;
             }
 
-            str = "";
-            str += Encoding.ASCII.GetString(new[] { (byte)((start % 8) + 'a') });
-            str += Encoding.ASCII.GetString(new[] { (byte)('8' - (start / 8)) });
-            str += Encoding.ASCII.GetString(new[] { (byte)((end % 8) + 'a') });
-            str += Encoding.ASCII.GetString(new[] { (byte)('8' - (end / 8)) });
+            if (diff.Count == 4)
+            {
+                // petit rocque white
+                if ((boardRef[60] == 'K') && (boardRef[63] == 'R') && (boardCurrent[63] == ' ') && (boardCurrent[61] == 'R'))
+                {
+                    return "e1g1";
+                }
 
-            return str;
+                // grand rocque white
+
+                if ((boardRef[60] == 'K') && (boardRef[56] == 'R') && (boardCurrent[56] == ' ') && (boardCurrent[59] == 'R'))
+                {
+                    return "e1c1";
+                }
+
+                // petit rocque black                
+                if ((boardRef[4] == 'k') && (boardRef[7] == 'r') && (boardCurrent[7] == ' ') && (boardCurrent[5] == 'r'))
+                {
+                    return "e8g8";
+                }
+
+                // grand rocque black
+                if ((boardRef[4] == 'k') && (boardRef[0] == 'r') && (boardCurrent[0] == ' ') && (boardCurrent[3] == 'r'))
+                {
+                    return "e8c8";
+                }
+
+            }
+
+            return "";
+
+
         }
 
         public void ComputeBoardFromMove(ref char[] board, string szMove)
@@ -110,6 +160,49 @@ namespace ChessMonitor
 
             board[e] = board[s];
             board[s] = ' ';
+
+
+            // petit rocque white
+            if (szMove == "e1g1")
+            {
+                if ((board[60] == 'K') && (board[63] == 'R'))
+                {
+                    board[63] = ' ';
+                    board[61] = 'R';
+                }
+            }
+
+
+            // grand rocque white
+            if (szMove == "e1c1")
+            {
+                if ((board[60] == 'K') && (board[56] == 'R'))
+                {
+                    board[56] = ' ';
+                    board[59] = 'R';
+                }
+            }
+
+            // petit rocque black
+            if (szMove == "e8g8")
+            {
+                if ((board[4] == 'k') && (board[7] == 'r'))
+                {
+                    board[7] = ' ';
+                    board[5] = 'r';
+                }
+            }
+
+            // grand rocque black
+            if (szMove == "e8c8")
+            {
+                if ((board[4] == 'k') && (board[0] == 'r'))
+                {
+                    board[0] = ' ';
+                    board[3] = 'r';
+                }
+            }
+
 
 
             for (int ii = 0; ii < 8; ii++)
@@ -132,7 +225,7 @@ namespace ChessMonitor
                 Console.WriteLine("[TCP]:" + message);
 
                 tcpclnt.Connect(server, 13000);
-               
+
                 StreamWriter writer = new StreamWriter(tcpclnt.GetStream(), Encoding.ASCII);
                 StreamReader reader = new StreamReader(tcpclnt.GetStream(), Encoding.ASCII);
                 writer.AutoFlush = true;
@@ -162,7 +255,7 @@ namespace ChessMonitor
         }
 
 
-        
+
 
     }
 }
