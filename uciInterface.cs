@@ -37,7 +37,10 @@ namespace ChessMonitor
                 Connect("127.0.0.1", "position startpos");
             }
 
-            string res = Connect("127.0.0.1", "go");
+            string res = Connect("127.0.0.1", "go movetime 15000");
+
+            Console.WriteLine(res);
+
             string[] spl = res.Split(' ');
 
             if (spl[0] == "bestmove")
@@ -106,6 +109,16 @@ namespace ChessMonitor
                 str += Encoding.ASCII.GetString(new[] { (byte)((end % 8) + 'a') });
                 str += Encoding.ASCII.GetString(new[] { (byte)('8' - (end / 8)) });
 
+                if (boardCurrent[start] == 'P' && boardCurrent[start] == 'Q')
+                {
+                    // promotion!!!!
+                    str += "Q";
+                }
+                if (boardCurrent[start] == 'p' && boardCurrent[start] == 'q')
+                {
+                    // promotion!!!!
+                    str += "q";
+                }
                 return str;
             }
 
@@ -158,49 +171,53 @@ namespace ChessMonitor
             e = end_x + 8 * (7 - end_y);
             e = end_x + 8 * (7 - end_y);
 
-            board[e] = board[s];
-            board[s] = ' ';
+
 
 
             // petit rocque white
-            if (szMove == "e1g1")
+            if (szMove == "e1g1" && (board[60] == 'K') && (board[63] == 'R'))
             {
-                if ((board[60] == 'K') && (board[63] == 'R'))
-                {
-                    board[63] = ' ';
-                    board[61] = 'R';
-                }
+                board[60] = ' ';
+                board[63] = ' ';
+
+                board[61] = 'R';
+                board[62] = 'K';
             }
-
-
             // grand rocque white
-            if (szMove == "e1c1")
+            else if (szMove == "e1c1" && board[60] == 'K' && board[56] == 'R')
             {
-                if ((board[60] == 'K') && (board[56] == 'R'))
-                {
-                    board[56] = ' ';
-                    board[59] = 'R';
-                }
-            }
+                board[56] = ' ';
+                board[60] = ' ';
 
+                board[58] = 'K';
+                board[59] = 'R';
+            }
             // petit rocque black
-            if (szMove == "e8g8")
+            else if (szMove == "e8g8" && board[4] == 'k' && board[7] == 'r')
             {
-                if ((board[4] == 'k') && (board[7] == 'r'))
-                {
-                    board[7] = ' ';
-                    board[5] = 'r';
-                }
+                board[4] = ' ';
+                board[5] = 'r';
+                board[6] = 'k';
+                board[7] = ' ';
             }
-
             // grand rocque black
-            if (szMove == "e8c8")
+            else if (szMove == "e8c8" && board[4] == 'k' && board[0] == 'r')
             {
-                if ((board[4] == 'k') && (board[0] == 'r'))
-                {
-                    board[0] = ' ';
-                    board[3] = 'r';
-                }
+                board[0] = '0';
+                board[2] = 'k';
+                board[3] = 'r';
+                board[4] = '0';
+
+            }
+            else
+            {
+                board[e] = board[s];
+                board[s] = ' ';
+            }
+            if (szMove.Length == 5)
+            {
+                // promotion
+                board[e] = szMove[4];
             }
 
 

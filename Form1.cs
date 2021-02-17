@@ -18,6 +18,7 @@ namespace ChessMonitor
 {
     public partial class Form1 : Form
     {
+        int screen = 1;
 
         private Button button2;
         private GroupBox groupBox1;
@@ -36,8 +37,8 @@ namespace ChessMonitor
 
         private bool GameOngoing;
         private bool GameWaitOpponent;
-
-
+        private Button button1;
+        private CheckBox checkBoxRead;
         string timerDetectedMove;
 
         public Form1()
@@ -63,29 +64,20 @@ namespace ChessMonitor
         }
  
 
-        private void buttonCalibrate_Click(object sender, EventArgs e)
-        {
-            Bitmap captureBitmap = CaptureMyScreen();
-            captureBitmap.Save("capture.png");
-            checkBoxCalibrationDone.Checked = vision.ChessboardCalibrate(captureBitmap);
-            if (checkBoxCalibrationDone.Checked)
-            {
-                uci.newboard();
-            }
-
-        }
+    
 
 
-
-        private Bitmap CaptureMyScreen()
+        private Bitmap CaptureMyScreen(int screen)
         {
             try
             {
-                //Creating a new Bitmap object
-                Bitmap captureBitmap = new Bitmap(1920, 1080, PixelFormat.Format32bppArgb);
+                
 
                 //Creating a Rectangle object which will capture our Current Screen
-                Rectangle captureRectangle = Screen.AllScreens[0].Bounds;
+                Rectangle captureRectangle = Screen.AllScreens[screen].Bounds;
+
+                //Creating a new Bitmap object
+                Bitmap captureBitmap = new Bitmap(captureRectangle.Width, captureRectangle.Height, PixelFormat.Format32bppArgb);
 
                 //Creating a New Graphics Object
                 Graphics captureGraphics = Graphics.FromImage(captureBitmap);
@@ -116,12 +108,14 @@ namespace ChessMonitor
         {
             this.button2 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.checkBoxChessboardFound = new System.Windows.Forms.CheckBox();
             this.checkBoxCalibrationDone = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.textBoxMoussePos = new System.Windows.Forms.TextBox();
+            this.checkBoxRead = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -129,7 +123,7 @@ namespace ChessMonitor
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(241, 58);
+            this.button2.Location = new System.Drawing.Point(241, 19);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(83, 40);
             this.button2.TabIndex = 1;
@@ -141,22 +135,35 @@ namespace ChessMonitor
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.checkBoxRead);
+            this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Controls.Add(this.button4);
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.checkBoxChessboardFound);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.checkBoxCalibrationDone);
-            this.groupBox1.Location = new System.Drawing.Point(12, 377);
+            this.groupBox1.Location = new System.Drawing.Point(12, 319);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(330, 104);
+            this.groupBox1.Size = new System.Drawing.Size(330, 162);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Status";
             // 
+            // button1
+            // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.Location = new System.Drawing.Point(241, 110);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(83, 39);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "Read board";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button_readboard_Click);
+            // 
             // button4
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button4.Location = new System.Drawing.Point(7, 59);
+            this.button4.Location = new System.Drawing.Point(7, 117);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(83, 39);
             this.button4.TabIndex = 3;
@@ -167,13 +174,13 @@ namespace ChessMonitor
             // button3
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button3.Location = new System.Drawing.Point(241, 13);
+            this.button3.Location = new System.Drawing.Point(241, 65);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(83, 39);
             this.button3.TabIndex = 2;
             this.button3.Text = "CheckBoard";
             this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.button3.Click += new System.EventHandler(this.button_checkboard_Click);
             // 
             // checkBoxChessboardFound
             // 
@@ -201,9 +208,9 @@ namespace ChessMonitor
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.textBoxMoussePos);
-            this.groupBox2.Location = new System.Drawing.Point(12, 308);
+            this.groupBox2.Location = new System.Drawing.Point(12, 252);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(330, 63);
+            this.groupBox2.Size = new System.Drawing.Size(330, 61);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Mousse position";
@@ -213,10 +220,21 @@ namespace ChessMonitor
             // 
             this.textBoxMoussePos.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxMoussePos.Location = new System.Drawing.Point(14, 24);
+            this.textBoxMoussePos.Location = new System.Drawing.Point(14, 22);
             this.textBoxMoussePos.Name = "textBoxMoussePos";
             this.textBoxMoussePos.Size = new System.Drawing.Size(310, 20);
             this.textBoxMoussePos.TabIndex = 0;
+            // 
+            // checkBoxRead
+            // 
+            this.checkBoxRead.AutoSize = true;
+            this.checkBoxRead.Location = new System.Drawing.Point(6, 65);
+            this.checkBoxRead.Name = "checkBoxRead";
+            this.checkBoxRead.Size = new System.Drawing.Size(106, 17);
+            this.checkBoxRead.TabIndex = 5;
+            this.checkBoxRead.Text = "Chessboard read";
+            this.checkBoxRead.UseVisualStyleBackColor = true;
+            this.checkBoxRead.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged_1);
             // 
             // Form1
             // 
@@ -251,11 +269,22 @@ namespace ChessMonitor
 
 
 
+        private void buttonCalibrate_Click(object sender, EventArgs e)
+        {
+            Bitmap captureBitmap = CaptureMyScreen(screen);
+            captureBitmap.Save("capture.png");
+            checkBoxCalibrationDone.Checked = vision.ChessboardCalibrate(captureBitmap);
+            if (checkBoxCalibrationDone.Checked)
+            {
+                uci.newboard();
+            }
 
-        private void button3_Click(object sender, EventArgs e)
+        }
+
+        private void button_checkboard_Click(object sender, EventArgs e)
         {
             bool found = false;
-            Bitmap captureBitmap = CaptureMyScreen();
+            Bitmap captureBitmap = CaptureMyScreen(screen);
             captureBitmap.Save("capture.png");
             char[] board = new char[64];
 
@@ -272,23 +301,22 @@ namespace ChessMonitor
         }
 
         private void GamePlay(object sender, EventArgs e)
-        {
+        {           
             GameOngoing = true;
             GameWaitOpponent = false;
 
-
             bool found = false;
-            Bitmap captureBitmap = CaptureMyScreen();
+            Bitmap captureBitmap = CaptureMyScreen(screen);
             captureBitmap.Save("capture.png");
             char[] boardRead = new char[64];
             char[] boardAfter = new char[64];
-
+             
 
             checkBoxCalibrationDone.Checked = vision.ChessboardCalibrate(captureBitmap);
             if (checkBoxCalibrationDone.Checked)
             {
                 uci.newboard();
- 
+                captureBitmap = CaptureMyScreen(screen);
                 found = vision.ChessboardRead(captureBitmap, ref boardRead);
 
                 if (found)
@@ -303,7 +331,7 @@ namespace ChessMonitor
 
                 string move = uci.Compute();
                 
-                vision.MovePiece(move);
+                vision.MovePiece(screen,move);
                 GameWaitOpponent = true;
             }
 
@@ -321,7 +349,7 @@ namespace ChessMonitor
 
             if (GameWaitOpponent)
             {
-                captureBitmap = CaptureMyScreen();
+                captureBitmap = CaptureMyScreen(screen);
 
                 if (!vision.ChessboardRead(captureBitmap, ref boardRead))
                 {
@@ -330,6 +358,7 @@ namespace ChessMonitor
                 else
                 {
                     lclDetectedMove = uci.ComputeMoveFromBoard(uci.boardRef, boardRead);
+                    Console.WriteLine("lclDetectedMove: " + lclDetectedMove);
                     if ((lclDetectedMove == timerDetectedMove) && (timerDetectedMove.Length > 0))
                     {
                         char[] boardTmp = new char[64];
@@ -350,7 +379,7 @@ namespace ChessMonitor
 
                         move2play = uci.Compute();
                         
-                        vision.MovePiece(move2play);
+                        vision.MovePiece(screen,move2play);
                         GameWaitOpponent = true;
                         timerDetectedMove = "";
                         lclDetectedMove = "";
@@ -365,6 +394,23 @@ namespace ChessMonitor
         }
 
         private void tbMove_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_readboard_Click(object sender, EventArgs e)
+        {
+            bool found = false;
+            Bitmap captureBitmap = CaptureMyScreen(screen);
+            captureBitmap.Save("capture.png");
+            char[] boardRead = new char[64];
+
+
+            found = vision.ChessboardRead(captureBitmap, ref boardRead);
+            checkBoxRead.Checked = found;
+        }
+
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
         {
 
         }

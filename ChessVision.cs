@@ -43,7 +43,6 @@ namespace ChessMonitor
         private Rectangle chessboardCoord;
 
 
-
         public bool ChessboardRead(Bitmap captureBitmap, ref char[] board)
         {
             bool res = false;
@@ -51,13 +50,12 @@ namespace ChessMonitor
             List<int> coordY = new List<int>();
 
 
-
             var watch = System.Diagnostics.Stopwatch.StartNew();
             {
                 FindChessBoard(captureBitmap, ref coordX, ref coordY);
             }
             watch.Stop();
-            // Console.WriteLine("FindChessBoard  execution time:" + watch.ElapsedMilliseconds);
+            Console.WriteLine("FindChessBoard  execution time:" + watch.ElapsedMilliseconds);
 
 
             if ((coordX.Count == 9) && (coordY.Count == 9))
@@ -66,9 +64,9 @@ namespace ChessMonitor
                 {
                     removeBackground(ref captureBitmap);
                     AnalysePiece(captureBitmap, coordX, coordY, ref board);
-                }
+                } 
                 watch.Stop();
-                // Console.WriteLine("AnalysePiece execution time:" + watch.ElapsedMilliseconds);
+                Console.WriteLine("AnalysePiece execution time:" + watch.ElapsedMilliseconds);
 
                 chessboardCoord = new Rectangle(coordX[0], coordY[0], coordX[8] - coordX[0], coordY[8] - coordY[0]);
                 res = true;
@@ -97,7 +95,7 @@ namespace ChessMonitor
             return false;
         }
 
-        public void MovePiece(string szMove)
+        public void MovePiece(int screen, string szMove)
         {
             int start_x, start_y, end_x, end_y;
 
@@ -123,22 +121,70 @@ namespace ChessMonitor
 
                 System.Windows.Forms.Screen[] scrn = System.Windows.Forms.Screen.AllScreens;
 
-                s_screenX += scrn[0].Bounds.X;
-                s_screenY += scrn[0].Bounds.Y;
+                s_screenX += scrn[screen].Bounds.X;
+                s_screenY += scrn[screen].Bounds.Y;
 
-                e_screenX += scrn[0].Bounds.X;
-                e_screenY += scrn[0].Bounds.Y;
+                e_screenX += scrn[screen].Bounds.X;
+                e_screenY += scrn[screen].Bounds.Y;
 
 
                 MouseOperations.SetCursorPosition(s_screenX, s_screenY);
                 System.Threading.Thread.Sleep(200);
                 MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                 System.Threading.Thread.Sleep(200);
-                MouseOperations.SetCursorPosition((e_screenX + s_screenX) / 2, (e_screenY + e_screenY) / 2);
-                System.Threading.Thread.Sleep(200);
+
+                for (int ii = 0; ii < 10; ii++)
+                {
+                    int x = ((ii * e_screenX) + ((10 - ii) * s_screenX)) / 10;
+                    int y = ((ii * e_screenY) + ((10 - ii) * s_screenY)) / 10;
+
+                    MouseOperations.SetCursorPosition(x, y);
+                    System.Threading.Thread.Sleep(20);
+                }
+
                 MouseOperations.SetCursorPosition(e_screenX, e_screenY);
                 System.Threading.Thread.Sleep(200);
                 MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
+
+                if (szMove.Length > 4)
+                {
+                    int p_screenX = 0, p_screenY = 0;
+                    p_screenX = e_screenX;
+                    // promotion!!!!!
+                    if (szMove[4] == 'q')
+                    {
+                        p_screenY = e_screenY;
+                    }
+                    if (szMove[4] == 'k')
+                    {
+                        if (end_y == 8)
+                            p_screenY = e_screenY + (chessboardCoord.Width * 1) / 8;
+                        else
+                            p_screenY = e_screenY - (chessboardCoord.Width * 1) / 8;
+                    }
+                    p_screenY = e_screenY + (chessboardCoord.Width * 1) / 8;
+                    if (szMove[4] == 'r')
+                    {
+                        if (end_y == 8)
+                            p_screenY = e_screenY + (chessboardCoord.Width * 2) / 8;
+                        else
+                            p_screenY = e_screenY - (chessboardCoord.Width * 2) / 8;
+                    }
+                    if (szMove[4] == 'b')
+                    {
+                        if (end_y == 8)
+                            p_screenY = e_screenY + (chessboardCoord.Width * 3) / 8;
+                        else
+                            p_screenY = e_screenY - (chessboardCoord.Width * 3) / 8;
+                    }
+                    System.Threading.Thread.Sleep(400);
+                    MouseOperations.SetCursorPosition(p_screenX, p_screenY);
+                    System.Threading.Thread.Sleep(100);
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                    System.Threading.Thread.Sleep(100);
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
+
+                }
             }
             else
             {
@@ -187,66 +233,67 @@ namespace ChessMonitor
             Crop filterCrop;
 
             int offset = (coordX[1] - coordX[0]) / 8;
+            int offsetY = 2;
 
             //ImageEmptyBlack
-            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[5] + 1, (coordX[1] - coordX[0]) - 2 * offset, (coordY[6] - coordY[5]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[5] + offsetY, (coordX[1] - coordX[0]) - 2 * offset, (coordY[6] - coordY[5]) - 2 * offsetY));
             ImageEmptyBlack = filterCrop.Apply(image);
             ImageEmptyBlack.Save("result_EmptyBlack.png");
 
             //ImageEmptyWhite
-            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[5] + 1, (coordX[2] - coordX[1]) - 2 * offset, (coordY[6] - coordY[5]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[5] + offsetY, (coordX[2] - coordX[1]) - 2 * offset, (coordY[6] - coordY[5]) - 2 * offsetY));
             ImageEmptyWhite = filterCrop.Apply(image);
             ImageEmptyWhite.Save("result_EmptyWhite.png");
 
             //Pawn
-            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[6] + 1, (coordX[1] - coordX[0]) - 2 * offset, (coordY[7] - coordY[6]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[6] + offsetY, (coordX[1] - coordX[0]) - 2 * offset, (coordY[7] - coordY[6]) - 2 * offsetY));
             ImageWhitePawn = filterCrop.Apply(image);
             ImageWhitePawn.Save("result_white_pawn.png");
-            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[1], (coordX[1] - coordX[0]) - 2 * offset, (coordY[2] - coordY[1]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[1] + offsetY, (coordX[1] - coordX[0]) - 2 * offset, (coordY[2] - coordY[1]) - 2 * offsetY));
             ImageBlackPawn = filterCrop.Apply(image);
             ImageBlackPawn.Save("result_black_pawn.png");
 
             //rook
-            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[7] + 1, (coordX[1] - coordX[0]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[7] + offsetY, (coordX[1] - coordX[0]) - 2 * offset, (coordY[8] - coordY[7]) - 2 * offsetY));
             ImageWhiteRook = filterCrop.Apply(image);
             ImageWhiteRook.Save("result_white_rook.png");
-            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[0], (coordX[1] - coordX[0]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[0] + offset, coordY[0] + offsetY, (coordX[1] - coordX[0]) - 2 * offset, (coordY[1] - coordY[0]) - 2 * offsetY));
             ImageBlackRook = filterCrop.Apply(image);
             ImageBlackRook.Save("result_black_rook.png");
 
             //Knight
-            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[7] + 1, (coordX[2] - coordX[1]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[7] + offsetY, (coordX[2] - coordX[1]) - 2 * offset, (coordY[8] - coordY[7]) - 2 * offsetY));
             ImageWhiteKnight = filterCrop.Apply(image);
             ImageWhiteKnight.Save("result_white_knight.png");
-            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[0] + 1, (coordX[2] - coordX[1]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[1] + offset, coordY[0] + offsetY, (coordX[2] - coordX[1]) - 2 * offset, (coordY[1] - coordY[0]) - 2 * offsetY));
             ImageBlackKnight = filterCrop.Apply(image);
             ImageBlackKnight.Save("result_black_knight.png");
 
 
             //bishop
-            filterCrop = new Crop(new Rectangle(coordX[2] + offset, coordY[7] + 1, (coordX[3] - coordX[2]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[2] + offset, coordY[7] + offsetY, (coordX[3] - coordX[2]) - 2 * offset, (coordY[8] - coordY[7]) - 2 * offsetY));
             ImageWhiteBishop = filterCrop.Apply(image);
             ImageWhiteBishop.Save("result_white_bishop.png");
-            filterCrop = new Crop(new Rectangle(coordX[2] + offset, coordY[0] + 1, (coordX[3] - coordX[2]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[2] + offset, coordY[0] + offsetY, (coordX[3] - coordX[2]) - 2 * offset, (coordY[1] - coordY[0]) - 2 * offsetY));
             ImageBlackBishop = filterCrop.Apply(image);
             ImageBlackBishop.Save("result_black_bishop.png");
 
             //queen
-            filterCrop = new Crop(new Rectangle(coordX[3] + offset, coordY[7] + 1, (coordX[4] - coordX[3]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[3] + offset, coordY[7] + offsetY, (coordX[4] - coordX[3]) - 2 * offset, (coordY[8] - coordY[7]) - 2 * offsetY));
             ImageWhiteQueen = filterCrop.Apply(image);
             ImageWhiteQueen.Save("result_white_queen.png");
 
-            filterCrop = new Crop(new Rectangle(coordX[3] + offset, coordY[0] + 1, (coordX[4] - coordX[3]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[3] + offset, coordY[0] + offsetY, (coordX[4] - coordX[3]) - 2 * offset, (coordY[1] - coordY[0]) - 2 * offsetY));
             ImageBlackQueen = filterCrop.Apply(image);
             ImageBlackQueen.Save("result_black_queen.png");
 
 
             //King
-            filterCrop = new Crop(new Rectangle(coordX[4] + offset, coordY[7] + 1, (coordX[5] - coordX[4]) - 2 * offset, (coordY[8] - coordY[7]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[4] + offset, coordY[7] + offsetY, (coordX[5] - coordX[4]) - 2 * offset, (coordY[8] - coordY[7]) - 2 * offsetY));
             ImageWhiteKing = filterCrop.Apply(image);
             ImageWhiteKing.Save("result_white_king.png");
 
-            filterCrop = new Crop(new Rectangle(coordX[4] + offset, coordY[0] + 1, (coordX[5] - coordX[4]) - 2 * offset, (coordY[1] - coordY[0]) - 2));
+            filterCrop = new Crop(new Rectangle(coordX[4] + offset, coordY[0] + offsetY, (coordX[5] - coordX[4]) - 2 * offset, (coordY[1] - coordY[0]) - 2 * offsetY));
             ImageBlackKing = filterCrop.Apply(image);
             ImageBlackKing.Save("result_black_king.png");
 
@@ -314,16 +361,54 @@ namespace ChessMonitor
                             coordY.Add(point.Y);
                             Points.Add(new Point(point.X, point.Y));
                         }
-                        //g.DrawPolygon(new Pen(Color.Red, 1.0f), Points.ToArray());
+                        g.DrawPolygon(new Pen(Color.Red, 1.0f), Points.ToArray());
 
                     }
                 }
             }
 
-            coordX = FindBoundary(coordX);
-            coordY = FindBoundary(coordY);
+            coordX = filterPos(coordX);
+            coordY = filterPos(coordY);
 
+            if (coordX.Count > 2 && coordY.Count > 2)
+                g.DrawRectangle(new Pen(Color.Green, 1.0f), coordX[0], coordY[0], coordX[coordX.Count - 1] - coordX[0], coordY[coordY.Count - 1] - coordY[0]);
 
+            image.Save("debug.bmp");
+        }
+
+        public List<int> filterPos(List<int> coord)
+        {
+            int lastCoord = 0;
+            int lastCoord1 = 0;
+            int lastCoord2 = 0;
+
+            int count = 0;
+
+            List<int> coordRet = new List<int>();
+            coord.Sort();
+            coord.Add(0);
+            for (int ii = 0; ii < coord.Count; ii++)
+            {
+                if (Math.Abs(coord[ii] - lastCoord) < 20)
+                {
+                    count++;
+                }
+                else if (count > 5)
+                {
+                    coordRet.Add(lastCoord2);
+                    count = 0;
+                }
+                else
+                {
+                    count = 0;
+                }
+
+                lastCoord2 = lastCoord1;
+                lastCoord1 = lastCoord;
+                lastCoord = coord[ii];
+            }
+
+            return coordRet;
         }
 
         private List<int> FindBoundary(List<int> coords)
@@ -385,8 +470,6 @@ namespace ChessMonitor
 
         private bool AnalysePiece(Bitmap image, List<int> coordX, List<int> coordY, ref char[] board)
         {
-
-
             if ((coordX.Count == 9) && (coordY.Count == 9))
             {
                 for (int xx = 0; xx < coordX.Count - 1; xx++)
@@ -396,149 +479,12 @@ namespace ChessMonitor
                         Crop filterCrop = new Crop(new Rectangle(coordX[xx], coordY[yy], (coordX[xx + 1] - coordX[xx]), (coordY[yy + 1] - coordY[yy])));
                         // apply the filter
                         Bitmap ImageCrop = filterCrop.Apply(image);
-                        ImageCrop.Save("result_" + (xx + 1) + "_" + (8 - yy) + ".png");
+                        //ImageCrop.Save("result_" + (xx + 1) + "_" + (8 - yy) + ".png");
 
                         float lvl = 0.0f;
                         float ret = 0.0f;
+                        parseAllPiece(board, xx, yy, ref ImageCrop, ref lvl, ref ret);
 
-                        isEmpty(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = ' ';
-                        }
-
-                        board[8 * yy + xx] = ' ';
-
-                        isWhitePawn(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'P';
-                        }
-
-                        isBlackPawn(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'p';
-                        }
-                        isWhiteRook(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'R';
-                        }
-                        isBlackRook(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'r';
-                        }
-                        isWhiteKnight(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'N';
-                        }
-                        isBlackKnight(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'n';
-                        }
-                        isWhiteBeshop(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'B';
-                        }
-                        isBlackBeshop(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'b';
-                        }
-                        isWhiteQueen(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'Q';
-                        }
-                        isBlackQueen(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'q';
-                        }
-                        isWhiteKing(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'K';
-                        }
-                        isBlackKing(ref ImageCrop, ref ret);
-                        if (ret > lvl)
-                        {
-                            lvl = ret;
-                            board[8 * yy + xx] = 'k';
-                        }
-
-
-                        /*
-                        if (isEmpty(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = ' ';
-                        }
-                        else if (isWhitePawn(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'P';
-                        }
-                        else if (isBlackPawn(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'p';
-                        }
-                        else if (isWhiteRook(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'R';
-                        }
-                        else if (isBlackRook(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'r';
-                        }
-                        else if (isWhiteKnight(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'N';
-                        }
-                        else if (isBlackKnight(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'n';
-                        }
-                        else if (isWhiteBeshop(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'B';
-                        }
-                        else if (isBlackBeshop(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'b';
-                        }
-                        else if (isWhiteQueen(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'Q';
-                        }
-                        else if (isBlackQueen(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'q';
-                        }
-                        else if (isWhiteKing(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'K';
-                        }
-                        else if (isBlackKing(ref ImageCrop))
-                        {
-                            board[8 * yy + xx] = 'k';
-                        }
-                        */
                     }
             }
             else
@@ -557,9 +503,98 @@ namespace ChessMonitor
             }
             */
             return true;
+
+
         }
 
+        void parseAllPiece(char[] board, int xx, int yy, ref Bitmap ImageCrop, ref float lvl, ref float ret)
+        {
+            isEmpty(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = ' ';
+                if (ret > 0.999)
+                    return;
+            }
 
+
+            board[8 * yy + xx] = ' ';
+
+            isWhitePawn(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'P';
+            }
+
+            isBlackPawn(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'p';
+            }
+            isWhiteRook(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'R';
+            }
+            isBlackRook(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'r';
+            }
+            isWhiteKnight(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'N';
+            }
+            isBlackKnight(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'n';
+            }
+            isWhiteBeshop(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'B';
+            }
+            isBlackBeshop(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'b';
+            }
+            isWhiteQueen(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'Q';
+            }
+            isBlackQueen(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'q';
+            }
+            isWhiteKing(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'K';
+            }
+            isBlackKing(ref ImageCrop, ref ret);
+            if (ret > lvl)
+            {
+                lvl = ret;
+                board[8 * yy + xx] = 'k';
+            }
+        }
         #region detection piece
 
         private bool isWhiteKing(ref Bitmap ImageCrop, ref float lvl)
@@ -567,10 +602,10 @@ namespace ChessMonitor
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteKing);
             lvl = matchings[0].Similarity;
-           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
-            {
-                Console.WriteLine("image comp not clear");
-            }*/
+            /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+             {
+                 Console.WriteLine("image comp not clear");
+             }*/
 
             if (matchings[0].Similarity > compThresold)
             {
@@ -600,10 +635,10 @@ namespace ChessMonitor
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteQueen);
             lvl = matchings[0].Similarity;
-           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
-            {
-                Console.WriteLine("image comp not clear");
-            }*/
+            /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+             {
+                 Console.WriteLine("image comp not clear");
+             }*/
             if (matchings[0].Similarity > compThresold)
             {
                 return true;
@@ -616,10 +651,10 @@ namespace ChessMonitor
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackQueen);
             lvl = matchings[0].Similarity;
-           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
-            {
-                Console.WriteLine("image comp not clear");
-            }*/
+            /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+             {
+                 Console.WriteLine("image comp not clear");
+             }*/
             if (matchings[0].Similarity > compThresold)
             {
                 return true;
@@ -632,10 +667,10 @@ namespace ChessMonitor
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhitePawn);
             lvl = matchings[0].Similarity;
-           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
-            {
-                Console.WriteLine("image comp not clear");
-            }*/
+            /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+             {
+                 Console.WriteLine("image comp not clear");
+             }*/
             if (matchings[0].Similarity > compThresold)
             {
                 return true;
@@ -666,10 +701,10 @@ namespace ChessMonitor
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackPawn);
             lvl = matchings[0].Similarity;
-     /*       if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
-            {
-                Console.WriteLine("image comp not clear");
-            }*/
+            /*       if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+                   {
+                       Console.WriteLine("image comp not clear");
+                   }*/
             if (matchings[0].Similarity > compThresold)
             {
                 return true;
@@ -699,10 +734,10 @@ namespace ChessMonitor
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageBlackRook);
             lvl = matchings[0].Similarity;
-           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
-            {
-                Console.WriteLine("image comp not clear");
-            }*/
+            /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+             {
+                 Console.WriteLine("image comp not clear");
+             }*/
             if (matchings[0].Similarity > compThresold)
             {
                 return true;
@@ -715,10 +750,10 @@ namespace ChessMonitor
             ExhaustiveTemplateMatching tm = new ExhaustiveTemplateMatching(0);
             TemplateMatch[] matchings = tm.ProcessImage(ImageCrop, ImageWhiteBishop);
             lvl = matchings[0].Similarity;
-           /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
-            {
-                Console.WriteLine("image comp not clear");
-            }*/
+            /* if ((matchings[0].Similarity < compThresold) && (matchings[0].Similarity > (compThresold - 0.1f)))
+             {
+                 Console.WriteLine("image comp not clear");
+             }*/
             if (matchings[0].Similarity > compThresold)
             {
                 return true;
